@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default Dark (Sleek Slate & Indigo) */
+    --color-bg-base: 11 15 25;      /* slate-950/900 mix */
+    --color-bg-surface: 17 24 39;   /* slate-900 */
+    --color-bg-panel: 31 41 55;     /* slate-800 */
+    --color-border: 255 255 255;    /* white for alpha */
+    --color-text-main: 243 244 246; /* slate-100 */
+    --color-text-muted: 156 163 175;/* slate-400 */
+    --color-primary: 99 102 241;    /* indigo-500 */
+    --color-primary-light: 129 140 248; /* indigo-400 */
+    --color-accent: 16 185 129;    /* emerald-500 */
+    --color-error: 239 68 68;       /* red-500 */
+  }
+
+  [data-theme="light"] {
+    /* Light (Sophisticated Snow & Slate) */
+    --color-bg-base: 248 250 252;   /* slate-50 */
+    --color-bg-surface: 255 255 255;/* white */
+    --color-bg-panel: 241 245 249;  /* slate-100 */
+    --color-border: 0 0 0;          /* black for alpha */
+    --color-text-main: 15 23 42;    /* slate-900 */
+    --color-text-muted: 100 116 139;/* slate-500 */
+    --color-primary: 79 70 229;     /* indigo-600 */
+    --color-primary-light: 99 102 241; /* indigo-500 */
+    --color-accent: 13 148 136;     /* teal-600 */
+    --color-error: 225 29 72;       /* rose-600 */
+  }
+
+  [data-theme="hacker"] {
+    /* GitHub Dark */
+    --color-bg-base: 13 17 23;      /* GitHub Dark base */
+    --color-bg-surface: 22 27 34;   /* GitHub Dark surface */
+    --color-bg-panel: 33 38 45;     /* GitHub Dark panel */
+    --color-border: 255 255 255;
+    --color-text-main: 201 209 217; /* soft light gray */
+    --color-text-muted: 139 148 158;/* muted gray */
+    --color-primary: 88 166 255;    /* GitHub Blue */
+    --color-primary-light: 31 111 235; /* GitHub Dark Blue */
+    --color-accent: 63 185 80;      /* GitHub Green */
+    --color-error: 248 81 73;       /* soft red */
+  }
+
+  [data-theme="oceanic"] {
+    /* Nord / Nordic Ice */
+    --color-bg-base: 46 52 64;      /* Nord polar night 0 */
+    --color-bg-surface: 59 66 82;   /* Nord polar night 1 */
+    --color-bg-panel: 67 76 94;     /* Nord polar night 2 */
+    --color-border: 255 255 255;
+    --color-text-main: 236 239 244; /* Nord snow storm 2 */
+    --color-text-muted: 216 222 233;/* Nord snow storm 0 */
+    --color-primary: 136 192 208;   /* Nord Cyan */
+    --color-primary-light: 143 188 187; /* Nord Frost teal */
+    --color-accent: 163 190 140;    /* Nord aurora green */
+    --color-error: 191 97 106;      /* Nord aurora red */
+  }
+
+  [data-theme="dracula"] {
+    /* Dracula Theme */
+    --color-bg-base: 30 31 41;      /* Dracula Background */
+    --color-bg-surface: 40 42 54;   /* Dracula Current Line */
+    --color-bg-panel: 68 71 90;     /* Dracula Selection */
+    --color-border: 255 255 255;
+    --color-text-main: 248 248 242; /* Dracula Foreground */
+    --color-text-muted: 98 114 164; /* Dracula Comment */
+    --color-primary: 189 147 249;   /* Dracula Purple */
+    --color-primary-light: 255 121 198; /* Dracula Pink */
+    --color-accent: 80 250 123;     /* Dracula Green */
+    --color-error: 255 85 85;       /* Dracula Red */
+  }
+
+  [data-theme="monokai"] {
+    /* Monokai Theme */
+    --color-bg-base: 39 40 34;      /* Monokai Background */
+    --color-bg-surface: 30 31 28;   /* Monokai Darker Background */
+    --color-bg-panel: 62 61 50;     /* Monokai Current Line */
+    --color-border: 255 255 255;
+    --color-text-main: 248 248 242; /* Monokai Foreground */
+    --color-text-muted: 117 113 94; /* Monokai Muted Gray */
+    --color-primary: 249 38 114;    /* Monokai Pink */
+    --color-primary-light: 102 217 239; /* Monokai Cyan */
+    --color-accent: 166 226 70;     /* Monokai Lime Green */
+    --color-error: 249 38 114;      /* Monokai Pink */
+  }
+
+  [data-theme="gruvbox"] {
+    /* Gruvbox Retro Dark */
+    --color-bg-base: 29 32 33;      /* Gruvbox dark base */
+    --color-bg-surface: 40 40 40;   /* Gruvbox dark0 */
+    --color-bg-panel: 60 56 54;     /* Gruvbox dark1 */
+    --color-border: 255 255 255;
+    --color-text-main: 251 241 199; /* Gruvbox light0 */
+    --color-text-muted: 168 153 132;/* Gruvbox gray */
+    --color-primary: 254 128 25;   /* Gruvbox Orange */
+    --color-primary-light: 250 189 47; /* Gruvbox Yellow */
+    --color-accent: 184 187 38;    /* Gruvbox Green */
+    --color-error: 251 73 52;      /* Gruvbox Red */
+  }
+}
+
+/* 전역 바디 스타일 및 스크롤바 커스텀 */
+body {
+  margin: 0;
+  background-color: rgb(var(--color-bg-base)); 
+  color: rgb(var(--color-text-main));
+  overflow: hidden;
+}
+
+/* 크롬/사파리 브라우저 스크롤바 디자인 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* xterm.js 터미널 배경을 투명하게 맞추기 위한 커스텀 스타일 */
+.xterm {
+  padding: 8px;
+}
+.xterm-viewport {
+  background-color: transparent !important;
+}
+.xterm-screen {
+  background-color: transparent !important;
+}
+
+/* FlexLayout 탭 컴팩트 스타일 */
+.flexlayout__tab_button {
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 0 6px !important;
+  font-size: 11px !important;
+  line-height: 26px !important;
+}
+.flexlayout__tab_button_content {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+.flexlayout__tabset_header {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 2px !important;
+}
+.flexlayout__tabset_tabbar_outer {
+  height: 28px !important;
+}
+.flexlayout__tabset_tabbar_inner {
+  height: 28px !important;
+}
+.flexlayout__tab_button_trailing {
+  width: 14px !important;
+  height: 14px !important;
+}
+.flexlayout__tab_button--selected .flexlayout__tab_button_content,
+.flexlayout__tab_button:hover .flexlayout__tab_button_content {
+  opacity: 1;
+}

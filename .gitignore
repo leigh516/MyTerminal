@@ -1,0 +1,59 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Binaries
+*.exe
+
+# Backup & temp files
+*.backup
+*.backup.*
+*.corrupted
+*.reconstructed
+*.reconstructed_*
+*.extracted
+*.js_context
+*.current_range
+*.massive_line.json
+AIChat_true_backup.txt
+AIChat_view_backup.txt
+FileTree_backup.tsx
+
+# Work scripts (not part of source)
+scratch/
+scratch_*.cjs
+fix*.cjs
+patch*.cjs
+restore*.cjs
+extract*.cjs
+find_*.cjs
+update_*.py
+test_*.cjs
+create_*.cjs
+
+# AI settings (may contain API keys - keep secret)
+ai_settings.json
+
+# Generated data files
+history_find.json

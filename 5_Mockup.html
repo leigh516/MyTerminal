@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal Avy - Interactive UI Mockup</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=D2Coding&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
+      --glass-bg: rgba(15, 23, 42, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-highlight: rgba(255, 255, 255, 0.03);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #6366f1; /* Indigo */
+      --accent-gradient: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+      --green-accent: #10b981;
+      --red-accent: #f43f5e;
+      --yellow-accent: #eab308;
+      --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      --font-ui: 'Outfit', 'Inter', sans-serif;
+      --font-mono: 'D2Coding', 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    /* Window Header */
+    header.window-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 48px;
+    }
+
+    .window-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-glow {
+      width: 14px;
+      height: 14px;
+      background: var(--accent-gradient);
+      border-radius: 50%;
+      box-shadow: 0 0 10px #818cf8;
+      animation: pulse 2s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.25); opacity: 1; }
+    }
+
+    .window-title h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #f8fafc, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .win-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .win-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .win-close { background-color: var(--red-accent); }
+    .win-min { background-color: var(--yellow-accent); }
+    .win-max { background-color: var(--green-accent); }
+
+    /* Top Menu Bar */
+    nav.menu-bar {
+      display: flex;
+      background: rgba(15, 23, 42, 0.3);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 2px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      height: 28px;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .menu-item {
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .menu-item:hover {
+      color: var(--text-main);
+    }
+
+    /* Main Content Layout */
+    .app-workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Left Sidebar: File Tree */
+    aside.sidebar {
+      width: 260px;
+      background: var(--glass-bg);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      transition: width 0.3s ease;
+    }
+
+    .sidebar-section {
+      padding: 16px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      font-family: var(--font-ui);
+    }
+
+    .tree-node:hover {
+      background: var(--glass-highlight);
+      color: var(--text-main);
+    }
+
+    .tree-node.active {
+      background: rgba(99, 102, 241, 0.15);
+      border-left: 3px solid var(--accent-color);
+      color: var(--text-main);
+    }
+
+    .tree-node.file {
+      padding-left: 20px;
+    }
+
+    .tree-node.draggable {
+      cursor: grab;
+    }
+
+    .tree-node.draggable:active {
+      cursor: grabbing;
+    }
+
+    .icon-folder::before { content: "📁"; }
+    .icon-file::before { content: "📄"; }
+    .icon-ssh::before { content: "🌐"; }
+
+    /* Middle Area: Split Panes Container */
+    main.pane-container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      background: rgba(2, 6, 17, 0.4);
+    }
+
+    .pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--glass-border);
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.25);
+      position: relative;
+    }
+
+    .pane:last-child {
+      border-right: none;
+    }
+
+    /* Pane Header */
+    .pane-header {
+      background: rgba(15, 23, 42, 0.7);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 38px;
+    }
+
+    .pane-tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .pane-tab {
+      padding: 4px 12px;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pane-tab.active {
+      background: var(--accent-gradient);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    }
+
+    .pane-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pane-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .pane-btn:hover {
+      background: var(--glass-highlight);
+      color: var(--text-main);
+    }
+
+    /* Pane Content Area */
+    .pane-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* PTY Session styling */
+    .terminal-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Warp-style Block Terminal CSS */
+    .terminal-block {
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .terminal-block:hover {
+      border-color: var(--accent-color);
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+    }
+
+    .block-toolbar {
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 6px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      z-index: 5;
+    }
+
+    .terminal-block:hover .block-toolbar {
+      opacity: 1;
+    }
+
+    .block-command {
+      color: var(--green-accent);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      padding-top: 10px;
+    }
+
+    .terminal-block:hover .block-command {
+      padding-top: 38px; /* Toolbar height compensation */
+    }
+
+    .block-output {
+      padding: 8px 12px 12px 12px;
+      color: var(--text-main);
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .qa-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .qa-btn:hover {
+      background: var(--accent-color);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Terminal Input Line (Warp style input) */
+    .terminal-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--accent-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
+    }
+
+    .prompt-symbol {
+      color: var(--accent-color);
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .terminal-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      outline: none;
+    }
+
+    /* Monaco-like Editor styling */
+    .editor-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(5, 5, 15, 0.8);
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+    }
+
+    .editor-lines {
+      display: flex;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 12px 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .line-numbers {
+      width: 45px;
+      text-align: right;
+      padding-right: 12px;
+      color: #3b4252;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      user-select: none;
+    }
+
+    .code-content {
+      flex: 1;
+      padding-left: 12px;
+      outline: none;
+      caret-color: var(--accent-color);
+      white-space: pre-wrap;
+      color: #e5e9f0;
+      overflow-y: auto;
+    }
+
+    /* Highlight syntax coloring */
+    .keyword { color: #81a1c1; font-weight: bold; }
+    .string { color: #a3be8c; }
+    .function { color: #88c0d0; }
+    .comment { color: #4c566a; font-style: italic; }
+
+    /* Drag over visual effect for SFTP drop target */
+    .drag-over-effect {
+      border: 2px dashed var(--accent-color) !important;
+      background: rgba(99, 102, 241, 0.15) !important;
+    }
+
+    .drop-overlay-msg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--accent-color);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      display: none;
+      z-index: 10;
+      box-shadow: var(--panel-shadow);
+      pointer-events: none;
+    }
+
+    /* Progress overlay */
+    .progress-overlay {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 320px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: var(--panel-shadow);
+      display: none;
+      z-index: 100;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Bottom Fixed AI Panel */
+    footer.ai-chat-panel {
+      height: 220px;
+      background: var(--glass-bg);
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      transition: height 0.3s ease;
+      position: relative;
+      z-index: 20;
+    }
+
+    footer.ai-chat-panel.collapsed {
+      height: 40px;
+    }
+
+    .ai-header {
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 40px;
+      cursor: pointer;
+    }
+
+    .ai-title {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-badge {
+      background: var(--accent-gradient);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .ai-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* AI messages list */
+    .ai-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ai-msg {
+      display: flex;
+      gap: 10px;
+      max-width: 80%;
+    }
+
+    .ai-msg.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
+    }
+
+    .ai-msg.user .msg-avatar {
+      background: #475569;
+      box-shadow: none;
+    }
+
+    .msg-bubble {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .ai-msg.user .msg-bubble {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.25);
+    }
+
+    .ai-actions-wrapper {
+      margin-top: 6px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .ai-action-btn {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--green-accent);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font-mono);
+    }
+
+    .ai-action-btn:hover {
+      background: var(--green-accent);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* LLM API Quick Actions Side Panel */
+    .ai-quick-sidebar {
+      width: 240px;
+      border-left: 1px solid var(--glass-border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.2);
+    }
+
+    .quick-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .quick-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-card:hover {
+      background: var(--glass-highlight);
+      border-color: var(--accent-color);
+    }
+
+    .quick-card-header {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-main);
+    }
+
+    .quick-card-desc {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    /* Chat Input Form */
+    .ai-input-form {
+      border-top: 1px solid var(--glass-border);
+      padding: 10px 16px;
+      display: flex;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .ai-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .ai-input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .ai-submit-btn {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    }
+
+    .ai-submit-btn:hover {
+      transform: translateY(-1px);
+      opacity: 0.95;
+    }
+
+    .ai-submit-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* Korean IME Test Input Area */
+    .ime-input-box {
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .ime-input-box label {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .ime-test-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+
+    /* Utility styling */
+    .glow-text {
+      text-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+    }
+
+    .pulse-glow-border {
+      animation: borderGlow 2s infinite alternate;
+    }
+
+    @keyframes borderGlow {
+      0% { border-color: rgba(99, 102, 241, 0.3); }
+      100% { border-color: rgba(99, 102, 241, 0.8); }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 윈도우 타이틀바 -->
+  <header class="window-header">
+    <div class="window-title">
+      <div class="logo-glow"></div>
+      <h1>Terminal Avy <span style="font-size: 11px; color: var(--text-muted); font-weight: normal; margin-left: 6px;">[v0.1.0-MOCKUP]</span></h1>
+    </div>
+    
+    <div style="font-size: 12px; color: var(--text-muted); font-family: var(--font-ui);">
+      <span>🖥️ Session Layout: <strong>Backend Dev Env</strong></span>
+    </div>
+
+    <div class="window-controls">
+      <button class="win-btn win-min" title="최소화"></button>
+      <button class="win-btn win-max" title="최대화"></button>
+      <button class="win-btn win-close" title="닫기" onclick="window.close()"></button>
+    </div>
+  </header>
+
+  <!-- 상단 메뉴 바 -->
+  <nav class="menu-bar">
+    <span class="menu-item">파일 (F)</span>
+    <span class="menu-item">편집 (E)</span>
+    <span class="menu-item">세션 관리 (S)</span>
+    <span class="menu-item">레이아웃 저장 (L)</span>
+    <span class="menu-item">AI 설정 (A)</span>
+    <span class="menu-item">도움말 (H)</span>
+  </nav>
+
+  <!-- 앱 메인 워크스페이스 -->
+  <div class="app-workspace">
+    
+    <!-- 왼쪽 사이드바 (파일 탐색기) -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">
+          <span>로컬 탐색기 (Local)</span>
+          <span style="cursor: pointer;" title="새로고침">🔄</span>
+        </div>
+        <div class="tree-node" onclick="toggleFolder(this)"><span class="icon-folder"></span> src</div>
+        <div id="src-children" style="padding-left: 10px;">
+          <div class="tree-node file draggable" draggable="true" ondragstart="handleDragStart(event, 'App.jsx', 'local')" onclick="openFile('App.jsx')"><span class="icon-file"></span> App.jsx</div>
+          <div class="tree-node file draggable" draggable="true" ondragstart="handleDragStart(event, 'main.js', 'local')" onclick="openFile('main.js')"><span class="icon-file"></span> main.js</div>
+          <div class="tree-node file draggable" draggable="true" ondragstart="handleDragStart(event, 'index.css', 'local')" onclick="openFile('index.css')"><span class="icon-file"></span> index.css</div>
+        </div>
+        <div class="tree-node file draggable" draggable="true" ondragstart="handleDragStart(event, 'package.json', 'local')" onclick="openFile('package.json')"><span class="icon-file"></span> package.json</div>
+        
+        <!-- IME 완성도 테스트 영역 -->
+        <div class="ime-input-box" style="margin-top: 16px;">
+          <label>한글 IME 테스트:</label>
+          <input type="text" class="ime-test-field" placeholder="여기에 한글을 입력해 보세요." value="터미널 에이비 한글 입력">
+        </div>
+      </div>
+
+      <div class="sidebar-section" style="flex: 1; border-bottom: none;">
+        <div class="sidebar-title">
+          <span>SSH 파일 트리 (ubuntu@webserver)</span>
+          <span style="cursor: pointer; color: var(--green-accent);">● Connected</span>
+        </div>
+        <div class="tree-node"><span class="icon-folder"></span> var</div>
+        <div style="padding-left: 10px;">
+          <div class="tree-node"><span class="icon-folder"></span> www</div>
+          <div style="padding-left: 10px;">
+            <div class="tree-node"><span class="icon-folder"></span> html</div>
+            <div style="padding-left: 10px;" id="ssh-drop-target-folder">
+              <div class="tree-node file" onclick="alert('SSH 원격 파일: index.html')"><span class="icon-file"></span> index.html</div>
+              <div class="tree-node file" onclick="alert('SSH 원격 파일: server.js')"><span class="icon-file"></span> server.js</div>
+              <!-- 드래그 드롭 성공 시 여기에 추가됨 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 중앙 분할 터미널/에디터 영역 -->
+    <main class="pane-container">
+      
+      <!-- 분할 1: 로컬 터미널 (Warp-style Block) -->
+      <section class="pane" id="pane-local-terminal">
+        <div class="pane-header">
+          <div class="pane-tabs">
+            <span class="pane-tab active">Local Terminal</span>
+            <span class="pane-tab">PowerShell</span>
+          </div>
+          <div class="pane-actions">
+            <span style="font-size: 11px; color: var(--text-muted); margin-right: 8px;">Ctrl + / - 로 개별 폰트조정 가능</span>
+            <button class="pane-btn" onclick="zoomPane('pane-local-terminal', 1)" title="글꼴 크게">➕</button>
+            <button class="pane-btn" onclick="zoomPane('pane-local-terminal', -1)" title="글꼴 작게">➖</button>
+            <button class="pane-btn" onclick="splitPane()" title="화면 분할">🪟</button>
+          </div>
+        </div>
+
+        <div class="pane-content" id="local-term-content" style="font-size: 13px;">
+          <div class="terminal-container">
+            
+            <!-- 블록 1: 서버 실행 (Warp-style Block) -->
+            <div class="terminal-block">
+              <div class="block-toolbar">
+                <span style="font-size: 11px; color: var(--text-muted);">실행 시간: 3초 소요</span>
+                <div class="quick-actions">
+                  <button class="qa-btn" onclick="copyText('npm run dev')">명령어 복사</button>
+                  <button class="qa-btn" onclick="copyText('Port 3000 busy error output')">출력 복사</button>
+                  <button class="qa-btn" onclick="executeCommand('npm run dev')">재실행</button>
+                </div>
+              </div>
+              <div class="block-command">$ npm run dev</div>
+              <div class="block-output" style="color: var(--red-accent);">
+Error: listen EADDRINUSE: address already in use :::3000
+    at Server.setupListenHandle [as _listen2] (node:net:1740:14)
+    at listenInCluster (node:net:1788:12)
+    at Server.listen (node:net:1876:7)
+[ERROR] 로컬 3000 포트가 이미 사용 중입니다. 서버 실행에 실패하였습니다.
+              </div>
+            </div>
+
+            <!-- 블록 2: 현재 상태 조회 -->
+            <div class="terminal-block">
+              <div class="block-toolbar">
+                <span style="font-size: 11px; color: var(--text-muted);">실행 시간: 10ms 소요</span>
+                <div class="quick-actions">
+                  <button class="qa-btn" onclick="copyText('git status')">명령어 복사</button>
+                  <button class="qa-btn" onclick="copyText('git status output')">출력 복사</button>
+                  <button class="qa-btn" onclick="executeCommand('git status')">재실행</button>
+                </div>
+              </div>
+              <div class="block-command">$ git status</div>
+              <div class="block-output" style="color: #cbd5e1;">
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/App.jsx
+
+no changes added to commit (use "git add" and/or "git commit -a")
+              </div>
+            </div>
+
+            <!-- 활성 입력줄 -->
+            <div class="terminal-input-wrapper">
+              <span class="prompt-symbol">avy-local:~/project$</span>
+              <input type="text" class="terminal-input" id="local-cmd-input" placeholder="명령어를 입력하세요... (예: ls -la)" onkeydown="handleTerminalKey(event)">
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+      <!-- 분할 2: 원격 SSH 및 코드 에디터 분할 뷰 -->
+      <section class="pane" id="pane-ssh-editor" style="display: flex; flex-direction: column;">
+        
+        <!-- 위쪽: 에디터 뷰 -->
+        <div style="flex: 1; display: flex; flex-direction: column; border-bottom: 1px solid var(--glass-border);">
+          <div class="pane-header">
+            <div class="pane-tabs">
+              <span class="pane-tab active" id="editor-tab-name">Editor: App.jsx</span>
+            </div>
+            <div class="pane-actions">
+              <span style="color: var(--green-accent); font-size: 11px; margin-right: 10px;">● Auto-sync Saved</span>
+              <button class="pane-btn" onclick="alert('저장되었습니다.')" title="저장">💾</button>
+            </div>
+          </div>
+          <div class="pane-content" style="padding: 8px;">
+            <div class="editor-wrapper">
+              <div class="editor-lines">
+                <div class="line-numbers">
+                  1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11
+                </div>
+                <div class="code-content" contenteditable="true" id="editor-code-area">
+<span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+  <span class="comment">// Terminal Avy 내장 코드 편집기 데모</span>
+  <span class="keyword">return</span> (
+    &lt;div className="app-container"&gt;
+      &lt;h1&gt;Terminal Avy 윈도우 통합 에디터&lt;/h1&gt;
+    &lt;/div&gt;
+  );
+}
+<span class="keyword">export default</span> App;</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 아래쪽: SSH 터미널 세션 (드롭 타겟) -->
+        <div style="flex: 1; display: flex; flex-direction: column; position: relative;" 
+             id="ssh-terminal-dropzone"
+             ondragover="handleDragOver(event)" 
+             ondragleave="handleDragLeave(event)" 
+             ondrop="handleDrop(event)">
+          
+          <div class="pane-header" style="background: rgba(15, 23, 42, 0.85);">
+            <div class="pane-tabs">
+              <span class="pane-tab active" style="background: linear-gradient(90deg, #10b981 0%, #059669 100%);">SSH: ubuntu@webserver</span>
+            </div>
+            <div class="pane-actions">
+              <button class="pane-btn" onclick="zoomPane('ssh-terminal-dropzone', 1)">➕</button>
+              <button class="pane-btn" onclick="zoomPane('ssh-terminal-dropzone', -1)">➖</button>
+            </div>
+          </div>
+
+          <div class="pane-content" style="background: rgba(5, 5, 10, 0.95); font-size: 13px;" id="ssh-terminal-text-container">
+            <div class="terminal-container">
+              <div style="color: var(--text-muted); font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+                Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)
+                <br>* Documentation: https://help.ubuntu.com
+                <br>Last login: Wed Jun  3 17:15:32 2026 from 112.144.22.89
+              </div>
+              
+              <div class="terminal-block" style="border-color: rgba(16, 185, 129, 0.2);">
+                <div class="block-command" style="color: var(--green-accent);">ubuntu@webserver:~$ tail -f /var/log/nginx/error.log</div>
+                <div class="block-output" style="color: var(--text-muted);">
+2026/06/03 17:50:01 [error] 1432#1432: *45 open() "/var/www/html/favicon.ico" failed (2: No such file or directory)
+2026/06/03 17:54:12 [info] nginx worker connection reset by peer
+                </div>
+              </div>
+
+              <div style="color: var(--text-main);"><span style="color: var(--green-accent);">ubuntu@webserver:~$</span> <span id="ssh-blinking-cursor" style="border-right: 2px solid white; animation: blink 1s infinite;">_</span></div>
+            </div>
+          </div>
+
+          <!-- 드래그 드롭 드롭존 오버레이 시각 효과 -->
+          <div class="drop-overlay-msg" id="drop-overlay-msg">
+            <h3 style="color: var(--green-accent); margin-bottom: 8px; font-size: 16px;">📂 원격 서버로 파일 업로드</h3>
+            <p style="font-size: 12px; color: var(--text-main);">여기에 드롭하면 <strong>ubuntu@webserver:/var/www/html/</strong> 경로로 전송(SFTP)됩니다.</p>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- 비동기 파일 업로드 프로그레스 바 UI -->
+  <div class="progress-overlay" id="transfer-progress-bar">
+    <div class="progress-text">
+      <span id="transfer-file-name" style="font-weight: 600; color: var(--text-main);">App.jsx 업로드 중...</span>
+      <span id="transfer-percentage" style="color: var(--accent-color);">45%</span>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="transfer-bar-fill" style="width: 45%;"></div>
+    </div>
+    <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between;">
+      <span>SFTP 프로토콜 전송</span>
+      <span id="transfer-speed">12.5 MB/s</span>
+    </div>
+  </div>
+
+  <!-- 하단 고정 AI 대화창 패널 (로컬 LLM 연동 데모) -->
+  <footer class="ai-chat-panel" id="ai-panel">
+    
+    <!-- AI 헤더 (클릭 시 접고 펴짐) -->
+    <div class="ai-header" onclick="toggleAIPanel()">
+      <div class="ai-title">
+        <span class="msg-avatar" style="width: 20px; height: 20px; font-size: 9px; box-shadow: none;">AI</span>
+        <span>Local AI Assistant</span>
+        <span class="ai-badge">Ollama: llama3 (Active)</span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted);">
+        <span id="ai-toggle-icon">▼ 접기</span>
+      </div>
+    </div>
+
+    <!-- AI 바디 -->
+    <div class="ai-body">
+      
+      <!-- 메시지 대화 목록 -->
+      <div class="ai-messages" id="ai-message-list">
+        <div class="ai-msg">
+          <div class="msg-avatar">AI</div>
+          <div class="msg-bubble">
+            안녕하세요! Terminal Avy AI 비서입니다. 현재 3000번 포트 충돌 오류가 감지되었습니다. 
+            해당 포트를 사용하는 프로세스를 찾아 종료할까요?
+            <div class="ai-actions-wrapper">
+              <button class="ai-action-btn" onclick="applyAICode('lsof -i :3000')">👉 포트 사용 프로세스 검색 실행</button>
+              <button class="ai-action-btn" onclick="applyAICode('kill -9 $(lsof -t -i:3000)')">👉 프로세스 강제 종료 실행</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측 빠른 추천 작업 패널 -->
+      <div class="ai-quick-sidebar">
+        <div class="quick-title">⚡ 빠른 도구 및 질문</div>
+        <div class="quick-card" onclick="askQuickAI('에러 분석')">
+          <div class="quick-card-header">🔴 터미널 마지막 에러 분석</div>
+          <div class="quick-card-desc">마지막 실패한 명령어의 오류를 파악해 해결법을 제시합니다.</div>
+        </div>
+        <div class="quick-card" onclick="askQuickAI('SSH 환경 설정')">
+          <div class="quick-card-header">🔑 SSH 접속 에러 디버깅</div>
+          <div class="quick-card-desc">원격 서버와의 인증 및 연결 실패 문제를 검토합니다.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AI 입력 폼 -->
+    <form class="ai-input-form" onsubmit="sendAIMessage(event)">
+      <input type="text" class="ai-input" id="ai-chat-input" placeholder="AI 비서에게 질문하거나 실행 명령어를 요청하세요 (예: 3000번 포트 확인하는 방법 알려줘)...">
+      <button type="submit" class="ai-submit-btn">전송</button>
+    </form>
+  </footer>
+
+  <script>
+    // 상태 변수
+    let isAIPanelCollapsed = false;
+    let draggedFileName = "";
+    let draggedSource = "";
+
+    // 1. 에디터 파일 내용 변경 시뮬레이션
+    const fileContents = {
+      'App.jsx': `import React from 'react';\n\nfunction App() {\n  // Terminal Avy 내장 코드 편집기 데모\n  return (\n    <div className="app-container">\n      <h1>Terminal Avy 윈도우 통합 에디터</h1>\n    </div>\n  );\n}\nexport default App;`,
+      'main.js': `import { app, BrowserWindow } from 'tauri';\n\n// Tauri v2 메인 프로세스 구동\nfunction createWindow() {\n  const win = new BrowserWindow({\n    title: "Terminal Avy",\n    width: 1200,\n    height: 800\n  });\n}\n\napp.on('ready', createWindow);`,
+      'index.css': `:root {\n  --primary: #6366f1;\n  --background: #0f172a;\n}\n\nbody {\n  background-color: var(--background);\n  color: #fff;\n  font-family: 'Outfit', sans-serif;\n}`,
+      'package.json': `{\n  "name": "terminal-avy",\n  "version": "0.1.0",\n  "private": true,\n  "dependencies": {\n    "@tauri-apps/api": "^2.0.0",\n    "xterm": "^5.3.0"\n  }\n}`
+    };
+
+    function openFile(fileName) {
+      document.getElementById('editor-tab-name').innerText = `Editor: ${fileName}`;
+      
+      // 구문 강조 흉내내기
+      let content = fileContents[fileName] || "";
+      content = content
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      // 특정 키워드 치환
+      const keywords = ["import", "from", "function", "return", "export", "default", "const", "let", "var", "new"];
+      keywords.forEach(kw => {
+        const reg = new RegExp(`\\b${kw}\\b`, 'g');
+        content = content.replace(reg, `<span class="keyword">${kw}</span>`);
+      });
+
+      document.getElementById('editor-code-area').innerHTML = content;
+      
+      // 액티브 효과
+      document.querySelectorAll('.tree-node').forEach(node => {
+        if (node.innerText.includes(fileName)) {
+          node.classList.add('active');
+        } else {
+          node.classList.remove('active');
+        }
+      });
+    }
+
+    // 2. 개별 터미널 폰트 스케일링 기능 시뮬레이션
+    const fontSizes = {};
+    function zoomPane(paneId, amount) {
+      const pane = document.getElementById(paneId);
+      const content = pane.querySelector('.pane-content');
+      if (!fontSizes[paneId]) {
+        fontSizes[paneId] = 13;
+      }
+      fontSizes[paneId] += amount;
+      if (fontSizes[paneId] < 9) fontSizes[paneId] = 9;
+      if (fontSizes[paneId] > 24) fontSizes[paneId] = 24;
+      
+      content.style.fontSize = fontSizes[paneId] + 'px';
+      console.log(`${paneId} font size set to: ${fontSizes[paneId]}px`);
+    }
+
+    // Keyboard Zoom binding simulation
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        zoomPane('pane-local-terminal', 1);
+      }
+      if (e.ctrlKey && e.key === '-') {
+        e.preventDefault();
+        zoomPane('pane-local-terminal', -1);
+      }
+    });
+
+    // 3. 드래그 앤 드롭 파일 업로드 (SFTP 전송) 시뮬레이션
+    function handleDragStart(e, fileName, source) {
+      draggedFileName = fileName;
+      draggedSource = source;
+      e.dataTransfer.setData("text/plain", fileName);
+      console.log(`Dragging file: ${fileName} from ${source}`);
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById('ssh-terminal-dropzone').classList.add('drag-over-effect');
+      document.getElementById('drop-overlay-msg').style.display = 'block';
+    }
+
+    // 드래그 해제 감지
+    function handleDragLeave(e) {
+      e.preventDefault();
+      document.getElementById('ssh-terminal-dropzone').classList.remove('drag-over-effect');
+      document.getElementById('drop-overlay-msg').style.display = 'none';
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById('ssh-terminal-dropzone').classList.remove('drag-over-effect');
+      document.getElementById('drop-overlay-msg').style.display = 'none';
+
+      if (draggedFileName) {
+        simulateSFTPUpload(draggedFileName);
+      }
+    }
+
+    function simulateSFTPUpload(fileName) {
+      const progressOverlay = document.getElementById('transfer-progress-bar');
+      const progressFill = document.getElementById('transfer-bar-fill');
+      const progressPercentage = document.getElementById('transfer-percentage');
+      const progressTitle = document.getElementById('transfer-file-name');
+
+      progressTitle.innerText = `[SFTP] ${fileName} 업로드 중...`;
+      progressOverlay.style.display = 'block';
+      
+      let percentage = 0;
+      const interval = setInterval(() => {
+        percentage += Math.floor(Math.random() * 10) + 5;
+        if (percentage >= 100) {
+          percentage = 100;
+          clearInterval(interval);
+          
+          // 완료 후 처리
+          setTimeout(() => {
+            progressOverlay.style.display = 'none';
+            // SSH 파일 목록에 파일 추가 시뮬레이션
+            const sshFolder = document.getElementById('ssh-drop-target-folder');
+            const newNode = document.createElement('div');
+            newNode.className = "tree-node file";
+            newNode.style.color = "var(--green-accent)";
+            newNode.innerHTML = `<span class="icon-file"></span> ${fileName} (업로드됨)`;
+            sshFolder.appendChild(newNode);
+            
+            // AI 알림
+            addAIMessage("AI", `[파일 전송 성공] 로컬 파일 '${fileName}'이(가) SSH 서버 '/var/www/html/' 경로로 안전하게 복사 완료되었습니다.`);
+          }, 600);
+        }
+        progressFill.style.width = percentage + '%';
+        progressPercentage.innerText = percentage + '%';
+      }, 100);
+    }
+
+    // 4. 로컬 터미널 명령어 입력 엔터 캡처 시뮬레이션
+    function handleTerminalKey(event) {
+      if (event.key === 'Enter') {
+        const input = document.getElementById('local-cmd-input');
+        const cmd = input.value.trim();
+        if (cmd) {
+          executeCommand(cmd);
+          input.value = "";
+        }
+      }
+    }
+
+    function executeCommand(cmd) {
+      const container = document.querySelector('.terminal-container');
+      const inputWrapper = document.querySelector('.terminal-input-wrapper');
+
+      // 새 터미널 블록 컴포넌트 추가
+      const block = document.createElement('div');
+      block.className = "terminal-block";
+      
+      let outputText = "";
+      let hasError = false;
+
+      if (cmd === 'ls' || cmd === 'ls -la' || cmd === 'ls -al') {
+        outputText = `total 24\ndrwxr-xr-x  5 avy  staff   160 Jun  3 17:50 .\ndrwxr-xr-x  3 avy  staff    96 Jun  3 17:40 ..\n-rw-r--r--  1 avy  staff  1281 Jun  3 17:50 1_Requirement.txt\n-rw-r--r--  1 avy  staff  8220 Jun  3 17:54 2_PRD.md\n-rw-r--r--  1 avy  staff  7110 Jun  3 17:56 3_Plan.md`;
+      } else if (cmd.includes('npm run dev')) {
+        outputText = `Error: listen EADDRINUSE: address already in use :::3000\n[ERROR] 포트 충돌 발생!`;
+        hasError = true;
+      } else {
+        outputText = `avy-terminal: command not found: ${cmd}`;
+        hasError = true;
+      }
+
+      block.innerHTML = `
+        <div class="block-toolbar">
+          <span style="font-size: 11px; color: var(--text-muted);">실행 속도: 15ms</span>
+          <div class="quick-actions">
+            <button class="qa-btn" onclick="copyText('${cmd}')">명령어 복사</button>
+            <button class="qa-btn" onclick="copyText('${outputText.replace(/\n/g, '\\n')}')">출력 복사</button>
+            <button class="qa-btn" onclick="executeCommand('${cmd}')">재실행</button>
+          </div>
+        </div>
+        <div class="block-command">$ ${cmd}</div>
+        <div class="block-output" style="color: ${hasError ? 'var(--red-accent)' : '#cbd5e1'};">${outputText}</div>
+      `;
+
+      // 인풋라인 직전에 삽입
+      container.insertBefore(block, inputWrapper);
+      
+      // 자동 스크롤
+      const paneContent = document.getElementById('local-term-content');
+      paneContent.scrollTop = paneContent.scrollHeight;
+
+      // 에러가 났을 때 AI 에이전트 자동 개입 시뮬레이션
+      if (hasError) {
+        setTimeout(() => {
+          addAIMessage("AI", `명령어 \`${cmd}\` 실행 중 에러가 발생한 것 같습니다. 분석을 시작할까요? <br>
+          <div class="ai-actions-wrapper">
+            <button class="ai-action-btn" onclick="askQuickAI('에러 분석')">🔍 AI 원인 분석 요청</button>
+          </div>`);
+        }, 500);
+      }
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      alert(`클립보드에 복사되었습니다: "${text}"`);
+    }
+
+    // 5. AI 채팅 패널 제어
+    function toggleAIPanel() {
+      const panel = document.getElementById('ai-panel');
+      const icon = document.getElementById('ai-toggle-icon');
+      isAIPanelCollapsed = !isAIPanelCollapsed;
+      
+      if (isAIPanelCollapsed) {
+        panel.classList.add('collapsed');
+        icon.innerText = "▲ 열기";
+      } else {
+        panel.classList.remove('collapsed');
+        icon.innerText = "▼ 접기";
+      }
+    }
+
+    function addAIMessage(sender, text) {
+      const list = document.getElementById('ai-message-list');
+      const msg = document.createElement('div');
+      msg.className = `ai-msg ${sender === 'user' ? 'user' : ''}`;
+      
+      msg.innerHTML = `
+        <div class="msg-avatar">${sender === 'user' ? 'ME' : 'AI'}</div>
+        <div class="msg-bubble">${text}</div>
+      `;
+      
+      list.appendChild(msg);
+      list.scrollTop = list.scrollHeight;
+    }
+
+    function sendAIMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addAIMessage('user', text);
+      input.value = "";
+
+      // 로컬 LLM 응답 연동 시뮬레이션
+      setTimeout(() => {
+        let aiResponse = "";
+        if (text.includes("3000") || text.includes("포트")) {
+          aiResponse = `Windows 환경에서 3000번 포트를 차지하는 프로세스를 해제하기 위한 명령어 세트입니다. 아래 명령어를 터미널에 넣어 실행해 보세요.<br>
+          <div class="ai-actions-wrapper">
+            <button class="ai-action-btn" onclick="applyAICode('netstat -ano | findstr 3000')">👉 포트 사용 PID 검색 (netstat)</button>
+            <button class="ai-action-btn" onclick="applyAICode('taskkill /F /PID <PID>')">👉 프로세스 강제 종료 (taskkill)</button>
+          </div>`;
+        } else {
+          aiResponse = `질문하신 '${text}'에 대해 로컬 LLM(llama3)이 제공하는 솔루션입니다. 테스트용 터미널 명령어 실행 기능을 지원합니다.`;
+        }
+        addAIMessage('AI', aiResponse);
+      }, 800);
+    }
+
+    function askQuickAI(type) {
+      if (type === '에러 분석') {
+        addAIMessage('user', '마지막 EADDRINUSE 에러 로그 분석해줘.');
+        setTimeout(() => {
+          addAIMessage('AI', `분석 결과: 현재 시스템의 3000번 포트를 다른 프로세스(예: 백그라운드 Node 서버)가 점유하고 있습니다.<br>
+          <strong>해결 방안:</strong><br>
+          1. 다른 서버 포트를 3001번으로 바꾼다.<br>
+          2. 점유 중인 프로세스를 명시적으로 강제 종료한다.<br>
+          <div class="ai-actions-wrapper">
+            <button class="ai-action-btn" onclick="applyAICode('kill -9 $(lsof -t -i:3000)')">👉 포트 프로세스 강제 종료 실행하기</button>
+          </div>`);
+        }, 600);
+      }
+    }
+
+    // AI 제안 코드를 터미널 인풋창에 주입
+    function applyAICode(code) {
+      const localInput = document.getElementById('local-cmd-input');
+      localInput.value = code;
+      localInput.focus();
+      
+      // 글자 타이핑 애니메이션 효과 흉내
+      let i = 0;
+      localInput.value = "";
+      const timer = setInterval(() => {
+        if (i < code.length) {
+          localInput.value += code[i];
+          i++;
+        } else {
+          clearInterval(timer);
+          // 입력창 테두리 강조
+          localInput.parentElement.classList.add('pulse-glow-border');
+          setTimeout(() => {
+            localInput.parentElement.classList.remove('pulse-glow-border');
+          }, 1500);
+        }
+      }, 20);
+    }
+
+    // 폴더 열고 닫기
+    function toggleFolder(elem) {
+      const children = document.getElementById('src-children');
+      if (children.style.display === 'none') {
+        children.style.display = 'block';
+        elem.querySelector('.icon-folder').style.transform = 'rotate(0deg)';
+      } else {
+        children.style.display = 'none';
+        elem.querySelector('.icon-folder').style.transform = 'rotate(-90deg)';
+      }
+    }
+  </script>
+</body>
+</html>
