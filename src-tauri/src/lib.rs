@@ -1274,6 +1274,32 @@ async fn sftp_read_file(session_id: String, path: String, state: State<'_, AppSt
     }
 }
 
+
+// 이미지 파일을 base64로 읽는 명령어 (ThemeEditor 배경 이미지 용)
+#[tauri::command]
+fn read_file_base64(path: String) -> Result<String, String> {
+    use std::io::Read;
+    let mut file = std::fs::File::open(&path).map_err(|e| e.to_string())?;
+    let mut buf = Vec::new();
+    file.read_to_end(&mut buf).map_err(|e| e.to_string())?;
+    Ok(base64_encode(&buf))
+}
+
+fn base64_encode(data: &[u8]) -> String {
+    const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut result = String::with_capacity((data.len() + 2) / 3 * 4);
+    for chunk in data.chunks(3) {
+        let b0 = chunk[0] as usize;
+        let b1 = if chunk.len() > 1 { chunk[1] as usize } else { 0 };
+        let b2 = if chunk.len() > 2 { chunk[2] as usize } else { 0 };
+        result.push(CHARS[(b0 >> 2)] as char);
+        result.push(CHARS[((b0 & 3) << 4) | (b1 >> 4)] as char);
+        result.push(if chunk.len() > 1 { CHARS[((b1 & 15) << 2) | (b2 >> 6)] as char } else { '=' });
+        result.push(if chunk.len() > 2 { CHARS[b2 & 63] as char } else { '=' });
+    }
+    result
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1300,7 +1326,8 @@ pub fn run() {
             sftp_remove_item,
             sftp_rename_item,
             ssh_exec_command,
-            get_local_drives
+            get_local_drives,
+            read_file_base64
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,0 +1,1307 @@
+const fs = require('fs');
+
+let content = fs.readFileSync('d:/Project/Terminal_avy/src/App.tsx.backup', 'utf8');
+
+// Replace imports
+content = content.replace(
+    'import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";',
+    'import { Layout, Model, TabNode, Actions, DockLocation } from "flexlayout-react";\nimport "flexlayout-react/style/dark.css";'
+);
+
+// Add FlexLayout model to state. We can insert it after `const [splitDirection, ...`
+const modelInit = `
+  // FlexLayout Model initialization
+  const [layoutModel, setLayoutModel] = useState<Model>(() => {
+    // 앱 시작 시 강제로 플렉스 레이아웃 초기화
+    if (!localStorage.getItem("super_terminal_fixed_v1")) {
+      localStorage.setItem("super_terminal_fixed_v1", "true");
+      localStorage.removeItem("terminal_avy_flexlayout");
+    }
+    const defaultLayout = {
+      global: {
+        tabEnableClose: true,
+        tabEnableRename: false,
+        tabSetEnableMaximize: false,
+      },
+      borders: [],
+      layout: {
+        type: "row",
+        weight: 100,
+        children: [
+          {
+            type: "tabset",
+            weight: 20,
+            id: "sidebar-tabset",
+            children: [
+              { type: "tab", name: "File Explorer", component: "filetree", id: "filetree-tab", enableMaximize: false }
+            ]
+          },
+          {
+            type: "tabset",
+            weight: 80,
+            id: "main-tabset",
+ 
+    if (filepane) {
+        fs.writeFileSync('d:/Project/Terminal_avy/src/components/FilePaneView.tsx', filepane);
+        console.log('Restored FilePaneView.tsx, length:', filepane.length);
+    }
+}
+  ]);
+
+  cwd?: string;
+}
+
+const DEFAULT_LAYOUT: IJsonModel = {
+  global: {
+    tabEnableClose: true,
+    tabSetEnableMaximize: true,
+    tabClassName: "terminal-tab",
+  },
+  borders: [],
+  layout: {
+    type: "row",
+    weight: 100,
+    children: [
+      {
+        type: "tabset",
+        weight: 70,
+        children: [
+          { type: "tab", id: "local-1", name: "로컬 터미널 1", component: "local" }
+        ]
+      },
+      {
+        type: "tabset",
+        weight: 30,
+        children: [
+          { type: "tab", id: "ai-panel", name: "AI", component: "ai", enableClose: false }
+        ]
+      }
+    ]
+  }
+};
+
+function App() {
+// 1. ?�성 ?�션 ?�태 �??�면 ID 목록 관�?(로컬?�토리�? ?�동 복원 ?�동)
+  const [sessions, setSessions] = useState<SessionItem[]>(() => {
+    const saved = localStorage.getItem("terminal_avy_active_sessions");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as SessionItem[];
+// 기존 로컬?�토리�???powershell.exe???��?경로�??�?�되???�던 ?�정??최신 pwsh.exe�??�괄 보정
+        return parsed.map(s => {
+          if (s.type === "local" && (s.shellPath?.includes("powershell.exe") || !s.shellPath)) {
+            return { ...s, shellPath: "pwsh.exe" };
+          }
+          return s;
+        });
+      } catch (e) {
+        console.error("로컬 ?�션 ?�싱 ?�류
+          id: Date.now().toString(),
+          role: "assistant",
+// 기본 로컬 ?��??�의 ??경로�?PowerShell Core(pwsh.exe)�?지?�하??기동
+        }
+{ id: "local-1", title: "로컬 ?��???1", type: "local", fontSize: 13, shellPath: "pwsh.exe" }
+    }
+  }, [lastTerminalError]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isGenerating) {
+    if (saved) {
+      try {
+        const json = JSON.parse(saved);
+        return Model.fromJson(json);
+      } catch (e) {
+        console.error("FlexLayout ?�싱 ?�류:", e);
+      }
+    }
+    return Model.fromJson(DEFAULT_LAYOUT);
+  });
+  
+  const layoutRef = React.useRef<any>(null);
+
+  // activeSessionIds?????�상 직접 관리하지 ?�으??기존 로직 ?�환?�을 ?�해 sessions 배열?�서 ID 추출
+  const activeSessionIds = sessions.map(s => s.id);
+
+  // 2. SSH ?�버 ?�결 관???�업 모달 ?�태
+  const [showSshModal, setShowSshModal] = useState<boolean>(false);
+  const [sshHost, setSshHost] = useState<string>("");
+  const [sshPort, setSshPort] = useState<number>(22);
+  const [sshUser, setSshUser] = useState<string>("");
+  const [sshPass, setSshPass] = useState<string>("");
+  const [sshKeyPath, setSshKeyPath] = useState<string>("");
+  const [sshCwd, setSshCwd] = useState<string>("/home/ubuntu");
+  const [sshError, setSshError] = useState<string>("");
+
+  const [sshProfiles, setSshProfiles] = useState<SshProfile[]>(() => {
+    const saved = localStorage.getItem("terminal_avy_ssh_profiles");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [selectedSshProfileName, setSelectedSshProfileName] = useState<string>("");
+  const [newSshProfileName, setNewSshProfileName] = useState<string>("");
+
+  useEffect(() => {
+    localStorage.setItem("terminal_avy_ssh_profiles", JSON.stringify(sshProfiles));
+  }, [sshProfiles]);
+
+// 3. ?�로???�??�?복원 관??모달 ?�태
+  const [profiles, setProfiles] = useState<LayoutProfile[]>(() => {
+    const saved = localStorage.getItem("terminal_avy_profiles");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
+  const [newProfileName, setNewProfileName] = useState<string>("");
+  const [selectedProfileName, setSelectedProfileName] = useState<string>("");
+
+// ?��????�러 ?�동 진단???�태
+  const [lastTerminalError, setLastTerminalError] = useState<string>("");
+
+// ?�티�??�커?? ?�션 �?AI ?�힘 관�??�태 (?��? 주석)
+  const [focusedSessionId, setFocusedSessionId] = useState<string | null>(null);
+  const [isFileTreeCollapsed, setIsFileTreeCollapsed] = useState<boolean>(false);
+  const terminalBuffersRef = React.useRef<Record<string, () => string>>({});
+
+  const [theme, setTheme] = useState<string>(() => {
+    return localStorage.getItem("terminal_avy_theme") || "dark";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("terminal_avy_theme", theme);
+// ?��????�러 ?�동 진단???�태
+  }, [theme]);
+
+// ?�티�??�커?? ?�션 �?AI ?�힘 관�??�태 (?��? 주석)
+  useEffect(() => {
+    localStorage.setItem("terminal_avy_active_sessions", JSON.stringify(sessions));
+        </div>
+        
+        <div className="flex gap-2">
+          <button onClick={handleAddLocalSession} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-xs transition border border-white/5 shadow-sm">
+            <Plus size={14} className="text-indigo-400" />
+            <span>New Local</span>
+          </button>
+          <button onClick={() => setShowSshModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-xs transition border border-white/5 shadow-sm">
+            <Wifi size={14} className="text-emerald-400" />
+            <span>SSH Connect</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Layout Area */}
+      <div className="flex-1 flex overflow-hidden min-h-0 relative flexlayout-custom-theme">
+         <Layout model={layoutModel} factory={factory} />
+      </div>
+
+      {/* Floating AI Chat Overlay */}
+      <div className="absolute right-4 bottom-4 z-50 pointer-events-none flex items-end justify-end">
+        <div className="pointer-events-auto">
+          <AIChat 
+            onInjectCommand={handleInjectCommand} 
+            lastTerminalError={lastTerminalError}
+            getActiveTerminalContent={getActiveTerminalContent}
+            activeSessionTitle={sessions.find(s => s.id === focusedSessionId)?.title}
+            isCollapsed={isAiCollapsed}
+            onToggleCollapse={() => setIsAiCollapsed(!isAiCollapsed)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
+`;
+    fs.writeFileSync('d:/Project/Terminal_avy/src/App.tsx', prefix + suffix);
+    console.log('Successfully wrote App.tsx');
+} else {
+    console.log('Failed to find return block');
+}
+
+    };
+  }, []);
+
+// 6. ????로컬 ?��????�션 추�? ?�들??
+  const handleAddLocalSession = () => {
+    const newId = `local-${Date.now()}`;
+// 백엔?�로부??PTY/SSH ?�션 종료 ?�호(pty-closed)�?받으�??�당 ?�션 창을 ?�동?�로 ?�거 (?��? 주석)
+      id: newId,
+title: `로컬 ?��???${sessions.filter(s => s.type === "local").length + 1}`,
+      type: "local",
+      handleCloseSession(closedSessionId);
+    });
+    return () => {
+      unlistenClosedPromise.then((unlisten) => unlisten());
+    };
+  }, []);
+
+  // 6. ????로컬 ?????션 추? ?들??  
+  const handleAddLocalSession = () => {
+    const newId = `local-${Date.now()}`;
+    const newSess: SessionItem = {
+      id: newId,
+      title: "로컬 터미널 1" onMouseDown={e => e.stopPropagation()}>
+          <button onClick={() => handleZoom(id, "in")} className="p-0.5 text-theme-muted hover:text-theme-text rounded transition" title="선택한 프로필 삭제"hover:bg-rose-500/20 p-1.5 rounded text-theme-muted hover:text-rose-400 transition border border-theme-border/5"
+                    title="?�택???�로????��"
+                  >
+                    <Trash2 size={13} />저장</button>
+                )}
+              </div>
+            )}
+
+      name: newSess.title,
+      id: newId
+    });
+    setFocusedSessionId(newId);
+  };
+
+// 7. SSH ?????션 추? ?들??
+  const handleConnectSsh = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sshHost || !sshUser) {
+setSshError("?스?? ??명을 ?력?세??");
+      return;
+    }
+
+    const sessionId = `ssh-${Date.now()}`;
+    const sshCount = sessions.filter(s => s.type === "ssh").length + 1;
+    const profileNamePart = selectedSshProfileName || `${sshUser}@${sshHost}`;
+
+placeholder="?�로???�름 ?�력..."
+      id: sessionId,
+      title: `SSH ${sshCount}: ${profileNamePart}`,
+      type: "ssh",
+      fontSize: 13,
+      cwd: sshCwd || undefined,
+      connectionInfo: {
+        host: sshHost,
+        port: sshPort,
+        username: sshUser,
+        password: sshPass || undefined,
+        keyPath: sshKeyPath || undefined,
+      }
+    };
+
+    setSessions(prev => [...prev, newSess]);
+    layoutRef.current?.addTabToActiveTabSet({
+      type: "tab",
+      component: "ssh",
+      name: newSess.title,
+      id: sessionId
+    });
+    setFocusedSessionId(sessionId);
+setShowSshModal(false); // ?�속 ??모달 ?�기
+    
+// 모달 ?�태 초기??    setSshHost("");
+    setSshPort(22);
+    setSshUser("");
+    setSshPass("");
+    setSshKeyPath("");
+    setSshCwd("/home/ubuntu");
+    setSelectedSshProfileName("");
+      keyPath: sshKeyPath || undefined,
+      cwd: sshCwd || undefined,
+    };
+    setSshProfiles(prev => {
+      const existingIdx = prev.findIndex(p => p.name === profile.name);
+      if (existingIdx !== -1) {
+        const updated = [...prev];
+        updated[existingIdx] = profile;
+        return updated;
+      }
+      return [...prev, profile];
+    });
+    setNewSshProfileName("");
+{/* ?�업 모달 2: ?�로???�????모달 */}
+    alert(`SSH ?�로??[${profile.name}]??가) ?�?�되?�습?�다.`);
+  };
+
+  const handleLoadSshProfile = (name: string) => {
+    const prof = sshProfiles.find(p => p.name === name);
+    if (!prof) return;
+<label className="text-theme-muted">?�로???�름</label>
+    setSshPort(prof.port);
+    setSshUser(prof.username);
+    setSshPass(prof.password || "");
+    setSshKeyPath(prof.keyPath || "");
+    setSshCwd(prof.cwd || "/home/ubuntu");
+    setSelectedSshProfileName(name);
+  };
+
+  const handleDeleteSshProfile = () => {
+    if (!selectedSshProfileName) return;
+"  const handleLoadSshProfile = (name: string) => {"
+    if (!confirmDelete) return;
+    setSshProfiles(prev => prev.filter(p => p.name !== selectedSshProfileName));
+    setSelectedSshProfileName("");
+  };
+
+  // 8. ?�일 ?�리?�서 ?�일 ?�택 ???�적?�로 ?�디???�션 분할 ?�성 (VS Code처럼 ?�일 ?�디??�??��?)
+  const handleFileSelect = async (filePath: string, fileName: string, isRemote: boolean) => {
+    try {
+      const editorSessId = "editor-main"; // 고정???�일 ?�디??ID ?�용
+      let content = "";
+      
+      if (isRemote) {
+        content = "// [?�격 ?�일] ?�기�?준�?중입?�다...";
+"    const confirmDelete = window.confirm(`?�로??[${selectedSshProfileName}]??�? ??��?�시겠습?�까?`);"
+        content = await invoke("read_local_file", { path: filePath });
+      }
+
+      // ?��? ?�디???�션??존재?�는지 ?�인
+      const existingEditorIdx = sessions.findIndex(s => s.id === editorSessId);
+// 8. ?�일 ?�리?�서 ?�일 ?�택 ???�적?�로 ?�디???�션 분할 ?�성 (VS Code처럼 ?�일 ?�디??�??��?)
+      if (existingEditorIdx !== -1) {
+        // ?��? 존재?�다�??�당 ?�션 ?�보�??�데?�트
+const editorSessId = "editor-main"; // 고정???�일 ?�디??ID ?�용
+          prev.map(s => 
+            s.id === editorSessId 
+              ? {
+                  ...s,
+                  title: `코드 에디터 ${fileName}`,
+                  editorFilePath: filePath,
+                  editorFileName: fileName,
+                  editorFileContent: content
+// ?��? ?�디???�션??존재?�는지 ?�인
+              : s
+          )
+        );
+// ?��? 존재?�다�??�당 ?�션 ?�보�??�데?�트
+        if (!model.getNodeById(editorSessId)) {
+          layoutRef.current?.addTabToActiveTabSet({
+            type: "tab",
+            component: "editor",
+            name: `코드 에디터 ${fileName}`,
+            id: editorSessId
+          });
+        }
+      } else {
+        // 존재하지 않는다면 신규 세션 추가
+        const newSess: SessionItem = {
+          id: editorSessId,
+          title: `코드 에디터 ${fileName}`,
+          type: "editor",
+          fontSize: 13,
+          editorFilePath: filePath,
+          editorFileName: fileName,
+          editorFileContent: content
+        };
+        setSessions(prev => [...prev, newSess]);
+        // 에디터도 추가
+        if (!model.getNodeById(editorSessId)) {
+          layoutRef.current?.addTabToActiveTabSet({
+            type: "tab",
+            component: "editor",
+            name: newSess.title,
+            id: editorSessId
+          });
+        }
+      }
+      setFocusedSessionId(editorSessId);
+    } catch (e) {
+      console.error("파일 읽기 실패:", e);
+    }
+  };
+
+  // 9. 파일 관리자에서 터미널 열기 핸들러  
+  const handleOpenTerminalFromTree = (path: string, isRemote: boolean, sourceSessionId: string) => {
+    const addTabFallback = (tabNode: any) => {
+      if (!layoutRef.current) return;
+      const model = layoutRef.current.getModel();
+      const activeTabset = model.getActiveTabset();
+      if (activeTabset) {
+        layoutRef.current.addTabToActiveTabSet(tabNode);
+      } else {
+        const firstTabset = Object.values(model.getIdMap()).find((node: any) => node.getType() === "tabset");
+        if (firstTabset) {
+          layoutRef.current.addTabToTabSet(firstTabset.getId(), tabNode);
+        }
+      }
+    };
+
+    if (isRemote) {
+      const sourceSession = sessions.find(s => s.id === sourceSessionId);
+      if (!sourceSession || sourceSession.type !== "ssh" || !sourceSession.connectionInfo) return;
+      
+      const newId = `ssh-${Date.now()}`;
+      const newSess: SessionItem = {
+        id: newId,
+        title: `원격 SSH: ${sourceSession.connectionInfo.username}@${sourceSession.connectionInfo.host}`,
+        type: "ssh",
+        fontSize: 13,
+        cwd: path,
+        connectionInfo: sourceSession.connectionInfo
+      };
+      setSessions(prev => [...prev, newSess]);
+      layoutRef.current?.addTabToActiveTabSet({
+        type: "tab",
+        component: "ssh",
+        name: newSess.title,
+        id: newId
+      });
+      setFocusedSessionId(newId);
+    } else {
+      const newId = `local-${Date.now()}`;
+      const newSess: SessionItem = {
+        id: newId,
+        title: `로컬 터미널 ${sessions.filter(s => s.type === "local").length + 1}`,
+        type: "local",
+        fontSize: 13,
+        cwd: path,
+        shellPath: "pwsh.exe"
+      };
+      setSessions(prev => [...prev, newSess]);
+      layoutRef.current?.addTabToActiveTabSet({
+        type: "tab",
+        component: "local",
+        name: newSess.title,
+        id: newId
+      });
+      setFocusedSessionId(newId);
+    }
+  };
+
+
+
+  // ?�디???�일 ?�용 변�??�파 ?�들??  
+  const handleEditorContentChange = (id: string, value: string | undefined) => {
+    setSessions(prev => 
+      prev.map(s => s.id === id ? { ...s, editorFileContent: value || "" } : s)
+    );
+  };
+
+  // ?�디??개별 ?�일 ?�???�들??  
+  const handleSaveEditorFile = async (id: string) => {
+    const sess = sessions.find(s => s.id === id);
+    if (!sess || !sess.editorFilePath) return;
+
+    try {
+      if (sess.title.includes("[?�격]")) {
+// ?�디???�일 ?�용 변�??�파
+      } else {
+        await invoke("write_local_file", {
+          path: sess.editorFilePath,
+          content: sess.editorFileContent || "",
+        });
+        alert(`?�???�공: ${sess.editorFileName}`);
+      }
+    } catch (e) {
+      alert(`?�???�패: ${e}`);
+    }
+  };
+
+  // 9. ?�션 ?�립???�트 �?기능
+  const handleZoom = (id: string, direction: "in" | "out") => {
+    setSessions(prev => 
+      prev.map(s => {
+        if (s.id === id) {
+          const newSize = direction === "in" 
+            ? Math.min(s.fontSize + 1, 24) 
+              </button>
+              <button
+                className="w-full text-left px-4 py-2 hover:bg-theme-primary/20 flex items-center gap-2 transition-colors text-theme-text"
+                onClick={handleDownload}
+              >
+                <Download size={14} className="text-theme-muted" /> 로컬로 다운로드
+              </button>
+            </>
+          )}
+          {clipboardFiles && (
+            <button
+              className="w-full text-left px-4 py-2 hover:bg-theme-primary/20 flex items-center gap-2 transition-colors text-theme-text border-t border-theme-border/10 mt-1 pt-2"
+              onClick={handlePaste}
+            >
+              <ClipboardPaste size={14} className="text-theme-muted" />
+              붙여넣기 ({clipboardFiles.files.length})
+            </button>
+          )}
+          <button
+            className="w-full text-left px-4 py-2 hover:bg-theme-primary/20 flex items-center gap-2 transition-colors text-theme-text border-t border-theme-border/10 mt-1 pt-2"
+            onClick={handleOpenTerminal}
+          >
+            <Terminal size={14} className="text-theme-muted" /> 현재 위치에서 터미널 열기
+          </button>
+          {!contextMenu.isBackground && (
+            <button
+              className="w-full text-left px-4 py-2 hover:bg-red-500/20 text-red-400 flex items-center gap-2 transition-colors border-t border-theme-border/10 mt-1 pt-2"
+              onClick={handleDelete}
+            >
+              <Trash size={14} className="opacity-80" /> 삭제 (Delete)
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+    const prof = profiles.find(p => p.name === name);
+    if (!prof) return;
+    setSessions(prof.sessions);
+    if (prof.activeSessionIds && prof.activeSessionIds.length > 0) {
+      // ?�거???�로???�환?�을 ?�해 ??Model???�성
+      const newModelJson = {
+        ...DEFAULT_LAYOUT,
+        layout: {
+          ...DEFAULT_LAYOUT.layout,
+          children: [
+            {
+              type: "tabset",
+              weight: 70,
+
+      {/* 대화 영역 */}
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 custom-scrollbar">
+        {messages.map((msg) => (
+          <div key={msg.id} className="flex gap-3 w-full">
+            <div className="shrink-0 mt-1">
+              {msg.role === "assistant" ? (
+                <div className="w-7 h-7 rounded bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+                  <Bot size={15} className="text-indigo-400" />
+                </div>
+              ) : (
+                <div className="w-7 h-7 rounded bg-slate-700/50 border border-slate-600 flex items-center justify-center">
+                  <User size={15} className="text-slate-300" />
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-1 w-[calc(100%-2.5rem)]">
+              <span className="text-xs font-bold text-slate-500">
+                {msg.role === "assistant" ? aiModel : "You"}
+              </span>
+              <div className="mt-0.5 flex flex-col gap-2">
+                {msg.attachedFiles && msg.attachedFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+"                { type: \"tab\", id: \"ai-panel\", name: \"AI Assistant\", component: \"ai\", enableClose: false }"
+                      <div key={idx} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300">
+                        <Paperclip size={12} className="text-slate-500" />
+    }
+  };
+
+  // 13. AI ?�?�창???�안??명령 주입 ?�행 ?�들??  
+  const handleInjectCommand = async (command: string) => {
+    // ?�재 ?�커?�된 ?�션???�선?�고, ?�으�??�성?�된 ?�션 �?�?번째 ?��????�택
+    let targetSessId = focusedSessionId;
+    if (!targetSessId || (!targetSessId.startsWith("local-") && !targetSessId.startsWith("ssh-"))) {
+      targetSessId = activeSessionIds.find(id => id.startsWith("local-") || id.startsWith("ssh-")) || null;
+    }
+
+"    if (confirm(`?�말 ?�면구성 [${selectedProfileName}]??�? ??��?�시겠습?�까?`)) {"
+      alert("명령???�행???�성?�된 ?��????�션??존재?��? ?�습?�다.");
+      return;
+    }
+
+    try {
+      await invoke("write_to_pty", {
+        sessionId: targetSessId,
+        data: `${command}\r`,
+      });
+    } catch (e) {
+      console.error("명령 주입 ?�패:", e);
+    }
+  };
+
+  // 14. ?�재 ?�티�??�커?????��??????�는 ?�디??버퍼???�용??문자?�로 가?�오???�들??(?��? 주석)
+  const getActiveTerminalContent = (specificSessionId?: string) => {
+    let targetSessId = specificSessionId || focusedSessionId;
+    if (!targetSessId) {
+      // ?�커?�된 ?�션???�을 경우, ?�성 ?�션 �??��????�디???�서�?�?번째 ?�???�색
+      targetSessId = activeSessionIds.find(id => id.startsWith("local-") || id.startsWith("ssh-") || id.startsWith("editor-")) || null;
+    }
+    if (!targetSessId) return "";
+
+    const sess = sessions.find(s => s.id === targetSessId);
+    if (!sess) return "";
+
+    let infoHeader = `[?�션 ?�보: ID=${sess.id}, ?�?��?=${sess.title}, ?�형=${sess.type}]\n`;
+    if (sess.type === "ssh" && sess.connectionInfo) {
+      infoHeader += `[SSH ?�속 ?�?? ${sess.connectionInfo.username}@${sess.connectionInfo.host}]\n`;
+    }
+
+    if (sess.type === "editor") {
+// ?�커?�된 ?�션???�을 경우, ?�성 ?�션 �??��????�디???�서�?�?번째 ?�???�색
+    } else if (terminalBuffersRef.current[targetSessId]) {
+return `${infoHeader}[?��???버퍼 최근 100�??�용]\n${terminalBuffersRef.current[targetSessId]()}`;
+    }
+    return infoHeader;
+  };
+
+// 15. FlexLayout ?�벤??�??�더�??�들??
+  const onAction = (action: Action) => {
+    if (action.type === Actions.DELETE_TAB) {
+infoHeader += `[SSH ?�속 ?�?? ${sess.connectionInfo.username}@${sess.connectionInfo.host}]\n`;
+      if (id !== "ai-panel") {
+        handleCloseSession(id);
+      }
+return `${infoHeader}[?�디???�일 ?�용 (${sess.editorFileName})]\n${sess.editorFileContent || ""}`;
+    return action;
+return `${infoHeader}[?��???버퍼 최근 100�??�용]\n${terminalBuffersRef.current[targetSessId]()}`;
+
+  const onRenderTab = (node: TabNode, renderState: any) => {
+    const id = node.getId();
+    const isSpecial = id.startsWith("local-") || id.startsWith("ssh-") || id.startsWith("editor-");
+// 15. FlexLayout ?�벤??�??�더�??�들??
+      renderState.buttons.push(
+        <div key="zoom" className="flex items-center gap-0.5 mx-1" onMouseDown={e => e.stopPropagation()}>
+          <button onClick={() => handleZoom(id, "in")} className="p-0.5 text-theme-muted hover:text-theme-text rounded transition" title="글꼴 확대"><ZoomIn size={14}/></button>
+          <button onClick={() => handleZoom(id, "out")} className="p-0.5 text-theme-muted hover:text-theme-text rounded transition" title="글꼴 축소"><ZoomOut size={14}/></button>
+        </div>
+      );
+    }
+  };
+
+  const factory = (node: TabNode) => {
+    const component = node.getComponent();
+    const id = node.getId();
+
+    if (component === "ai") {
+      return (
+        <div className="w-full h-full p-2 bg-theme-base/20">
+          <AIChat
+            onInjectCommand={handleInjectCommand}
+            lastTerminalError={lastTerminalError}
+            getActiveTerminalContent={getActiveTerminalContent}
+            isCollapsed={false}
+            onToggleCollapse={() => {}}
+            activeTerminals={sessions.map(s => ({ id: s.id, title: s.title }))}
+            focusedSessionId={focusedSessionId}
+          />
+        </div>
+      );
+    }
+
+    const sess = sessions.find(s => s.id === id);
+    if (!sess) return null;
+
+    const isFocused = focusedSessionId === sess.id;
+
+    return (
+      <div 
+        onMouseDownCapture={() => setFocusedSessionId(id)}
+        className={`w-full h-full flex flex-col bg-theme-base/20 relative transition-all duration-200 ${
+          isFocused ? "ring-1 ring-inset ring-theme-primary/50" : ""
+
+          {isGenerating ? (
+            <button
+              onClick={() => {
+                if (abortTimeoutRef.current) {
+                  clearTimeout(abortTimeoutRef.current);
+                  abortTimeoutRef.current = null;
+                }
+                if (abortControllerRef.current) {
+                  abortControllerRef.current.abort();
+                  abortControllerRef.current = null;
+                }
+                setIsGenerating(false);
+                setMessages(prev => [
+                  ...prev,
+                  {
+                    id: Date.now().toString(),
+                    role: "assistant",
+                    content: "[응답이 사용자에 의해 중단되었습니다.]"
+                  }
+                ]);
+              }}
+              className="absolute right-2 bottom-2.5 p-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 border border-red-500/30 rounded-md transition"
+              title="생성 중단 (ESC)"
+            >
+              <StopCircle size={15} />
+            </button>
+          ) : (
+            <button
+              onClick={handleSend}
+              disabled={(!input.trim() && attachedFiles.length === 0)}
+              className="absolute right-2 bottom-2.5 p-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-md transition shadow-lg"
+            >
+              <Send size={15} />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+  return (
+    <div className="w-screen h-screen flex bg-theme-base text-theme-text overflow-hidden font-ui">
+      {/* ?�이?�바: ?�일 ?�색�?(고정 ?�비 ?�랜지???�라?�드) */}
+      <div 
+        className={`flex flex-col bg-theme-surface border-r border-theme-border/5 z-20 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${
+          isFileTreeCollapsed ? 'w-0 border-r-0 opacity-0' : 'w-72 opacity-100'
+        }`}
+      >
+        <div className="w-72 h-full">
+          <FileTree
+            activeSessionId={activeSessionIds.find(id => id.startsWith("ssh-")) || ""}
+            sshSessions={sessions.filter(s => s.type === "ssh")}
+            onFileSelect={handleFileSelect}
+            onOpenTerminal={handleOpenTerminalFromTree}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col min-w-0 flex-1 relative bg-theme-base">
+
+{/* 최상???�어 ?�보 �?*/}
+      <header className="h-12 bg-theme-surface/90 border-b border-theme-border/10 flex items-center justify-between px-6 shrink-0 z-10 select-none">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsFileTreeCollapsed(!isFileTreeCollapsed)} 
+            className="p-1.5 hover:bg-theme-border/10 rounded text-theme-muted transition hover:text-theme-text" 
+            title="?�이?�바 ?��?"
+          >
+            <LayoutIcon size={16} />
+          </button>
+          <div className="w-3.5 h-3.5 bg-theme-primary rounded-full animate-pulse shadow-lg shadow-theme-primary/50" />
+          <h1 className="font-extrabold text-sm tracking-wider text-theme-text uppercase">
+            Terminal Avy Workspace
+          </h1>
+{/* 최상???�어 ?�보 �?*/}
+        
+        {/* ?�이?�브 ?�태 ?�림 �??�마 ?�정 */}
+{/* ?�이?�브 ?�태 ?�림 �??�마 ?�정 */}
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">?�마:</span>
+            <select
+              value={theme}
+                    setSshError("");
+                  }}
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded transition"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded transition"
+                >
+                  원격 서버 접속
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 팝업 모달 2: 프로필 저장 폼 모달 */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+          <div className="bg-slate-900 border border-white/10 rounded-xl w-full max-w-xs p-5 shadow-2xl flex flex-col gap-3 text-xs">
+            <h4 className="font-bold text-slate-200 text-sm">💾 현재 화면구성 저장</h4>
+            
+            <div className="flex flex-col gap-1">
+              <label className="text-slate-400">프로필 이름</label>
+              <input
+                type="text"
+                required
+                placeholder="예: 백엔드 개발 구성"
+                value={newProfileName}
+                onChange={(e) => setNewProfileName(e.target.value)}
+                className="bg-slate-950 border border-white/10 rounded p-1.5 text-slate-200 outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div className="flex gap-2 border-t border-white/5 pt-3">
+          
+          <button
+{/* ?�션 ?�성 �??�면 분할 ?�어 메뉴 �?*/}
+            className="flex items-center gap-1.5 bg-theme-accent/20 hover:bg-theme-accent/40 border border-theme-accent/30 hover:border-theme-accent text-theme-text text-xs px-3 py-1.5 rounded transition font-semibold"
+          >
+            <Plus size={13} />
+<span>SSH ?��???추�?</span>
+          </button>
+          
+          <div className="w-px h-5 bg-theme-border/10 mx-1" />
+
+"            <span>로컬 ?��???추�?</span>저장</button>"
+          {/* <button
+            onClick={() => setSplitDirection(prev => prev === "horizontal" ? "vertical" : "horizontal")}
+            className="flex items-center gap-1.5 bg-theme-panel/40 hover:bg-theme-panel/80 border border-theme-border/10 text-theme-text text-xs px-3 py-1.5 rounded transition font-semibold"
+title="?�면 분할 방향 가�??�로 변�?
+          >
+            <LayoutIcon size={13} />
+"            <span>SSH ?��???추�?</span>저장</button>"
+          </button> */}
+        </div>
+
+{/* ?�면 분할 방향 ?�어 - FlexLayout?�로 교체?�어 ???�상 ?�용?��? ?�음 */}
+        <div className="flex items-center gap-2 text-xs">
+          <button
+            onClick={() => setShowProfileModal(true)}
+title="?�면 분할 방향 가�??�로 변�?
+          >
+            <Save size={13} />
+            <span>Toggle Split Direction</span>
+          </button>
+
+{/* 구성 ?�로???�??�?복원 목록 */}
+            <div className="flex items-center gap-1.5">
+              <FolderOpen size={13} className="text-theme-muted" />
+              <select
+                value={selectedProfileName}
+                onChange={(e) => handleLoadProfile(e.target.value)}
+     
+                value={newProfileName}
+                onChange={(e) => setNewProfileName(e.target.value)}
+                className="bg-slate-950 border border-white/10 rounded p-1.5 text-slate-200 outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div className="flex gap-2 border-t border-white/5 pt-3">
+              <button
+                type="button"
+                onClick={() => {
+title="?�택???�면구성 ??��"
+                />
+              </div>
+
+              {sshError && (
+                <div className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2 rounded flex items-center gap-1.5">
+                  <ShieldAlert size={14} className="shrink-0" />
+                  <span className="truncate">접속 실패: {sshError}</span>
+                </div>
+title="?�택???�면구성 ??��"
+{/* 메인 리사?��? ?�널 분할 ?�역 ?�??FlexLayout ?�입 */}
+              <div className="flex gap-2 border-t border-white/5 pt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSshModal(false);
+                    setSshError("");
+                  }}
+{/* 메인 리사?��? ?�널 분할 ?�역 ?�??FlexLayout ?�입 */}
+                >
+                  취소
+{/* 모든 ?��???로컬/SSH)???�혔?????�시??중앙 ?�션 ?�성 메뉴 ?�버?�이 */}
+                <button
+          <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
+            <div className="bg-theme-surface/80 backdrop-blur border border-theme-border/10 p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 pointer-events-auto">
+              <div className="flex flex-col items-center gap-2 mb-2">
+                <Terminal size={32} className="text-theme-muted mb-1" />
+<h2 className="text-lg font-bold text-theme-text">?��????�션 ?�음</h2>
+<p className="text-xs text-theme-muted">?�로???��????�션???�성?�여 ?�업???�작?�세??</p>
+{/* 모든 ?��???로컬/SSH)???�혔?????�시??중앙 ?�션 ?�성 메뉴 ?�버?�이 */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleAddLocalSession}
+                  className="flex items-center gap-2 bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/50 text-white px-4 py-2.5 rounded-lg transition font-semibold shadow-lg shadow-indigo-500/20"
+                >
+"                <h2 className=\"text-lg font-bold text-theme-text\">?��????�션 ?�음</h2>"
+"                <p className=\"text-xs text-theme-muted\">?�로???��????�션???�성?�여 ?�업???�작?�세??</p>"
+                </button>
+                
+                <button
+                  onClick={() => setShowSshModal(true)}
+                  className="flex items-center gap-2 bg-emerald-600/80 hover:bg-emerald-500 border border-emerald-500/50 text-white px-4 py-2.5 rounded-lg transition font-semibold shadow-lg shadow-emerald-500/20"
+                >
+                  <Plus size={16} />
+<span>로컬 ?��???추�?</span>저장</button>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+<span>SSH ?��???추�?</span>저장</button>
+
+{/* ?�업 모달 1: SSH ?�규 ?�속 ?�력 ??모달 */}
+      {showSshModal && (
+        <div className="fixed inset-0 bg-theme-base/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+          <div className="bg-theme-surface border border-theme-border/10 rounded-xl w-full max-w-sm p-6 shadow-2xl flex flex-col gap-4 text-xs max-h-[90vh] overflow-y-auto">
+            
+            <div className="flex justify-between items-center border-b border-theme-border/5 pb-2">
+{/* ?�업 모달 1: SSH ?�규 ?�속 ?�력 ??모달 */}
+                <Wifi size={16} className="text-emerald-400" />
+                SSH Remote Connection
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowSshModal(false);
+                  setSshError("");
+                }} 
+                className="text-theme-muted hover:text-white transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {sshProfiles.length > 0 && (
+              <div className="flex items-center gap-2 mb-1">
+                <select
+                  value={selectedSshProfileName}
+                  onChange={(e) => handleLoadSshProfile(e.target.value)}
+                  className="flex-1 bg-theme-base border border-theme-border/10 rounded px-2 py-1.5 text-theme-text text-xs outline-none focus:border-i
+                    placeholder="root"
+<option value="" disabled>?�?�된 ?�결 ?�로???�택...</option>
+                    onChange={(e) => setSshUser(e.target.value)}
+                    className="bg-slate-950 border border-white/10 rounded p-1.5 text-slate-200 outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+"                  <option value=\"\" disabled>?�?�된 ?�결 ?�로???�택...</option>"
+                  <label className="text-slate-400">비밀번호</label>
+                  <input
+                    type="password"
+title="?�택???�로????��"
+                    value={sshPass}
+                    onChange={(e) => setSshPass(e.target.value)}
+                    className="bg-slate-950 border border-white/10 rounded p-1.5 text-slate-200 outline-none focus:border-indigo-500 font-mono"
+                  />
+"                    title=\"?�택???�로????��\""
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-slate-400">개인키 경로 (Private Key) <span className="text-[10px] text-slate-500">- 선택</span></label>
+                <input
+
+
+
+
+
+
+
+
+
+
+
+
+                    focusedNode
+
+
+
+
+
+                    onChange={(e) => setSshPort(parseInt(e.target.value))}
+                    className="bg-theme-base border border-theme-border/10 rounded p-1.5 text-theme-text outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <div className="flex-1 flex flex-col gap-1">
+                  <label className="text-theme-muted">계정�?(User)</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="root"
+                    value={sshUser}
+                    onChange={(e) => setSshUser(e.target.value)}
+                    className="bg-theme-base border border-theme-border/10 rounded p-1.5 text-theme-text outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+                <div className="flex-1 flex flex-col gap-1">
+                  <label className="text-theme-muted">비�?번호</label>
+                  <input
+                    type="password"
+                    placeholder="비�?번호 (?�택)"
+                    value={sshPass}
+                    onChange={(e) => setSshPass(e.target.value)}
+                    className="bg-theme-base border border-theme-border/10 rounded p-1.5 text-theme-text outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+<label className="text-theme-muted">개인??경로 (Private Key) <span className="text-[10px] text-theme-muted">- ?�택</span></label>
+                <input
+                  type="text"
+                  placeholder="C:\Users\name\.ssh\id_rsa"
+                  value={sshKeyPath}
+                  onChange={(e) => setSshKeyPath(e.target.value)}
+                  className="bg-theme-base border border-theme-border/10 rounded p-1.5 text-theme-text outline-none focus:border-indigo-500 font-mono"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-theme-muted">?�작 ?�더 (Start Path)</label>
+                <input
+                  type="text"
+                  placeholder="/home/ubuntu"
+                  value={sshCwd}
+                  onChange={(e) => setSshCwd(e.target.value)}
+                  className="bg-theme-base border border-theme-border/10 rounded p-1.5 text-theme-text outline-none focus:border-indigo-500 font-mono"
+                />
+              </div>
+
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 flex flex-col gap-1">
+                <label className="text-theme-muted">Start Path</label>
+                  <input
+                    type="text"
+placeholder="?�로???�름 ?�력..."
+                    value={newSshProfileName}
+                    onChange={(e) => setNewSshProfileName(e.target.value)}
+                    className="bg-theme-base border border-theme-border/10 rounded p-1
+"                    placeholder=\"?�로???�름 ?�력...\""
+   
+
+
+
+
+
+
+?�??                </button>
+
+
+
+"                  ?�??                </button>"
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    : "hover:bg-theme-panel hover:bg-whit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* ?�업 모달 2: ?�로???�????모달 */}
+
+
+          <div className="bg-theme-surface border border-theme-border/10 rounded-xl w-full max-w-xs p-5 shadow-2xl flex flex-col gap-3 text-xs">
+{/* ?�업 모달 2: ?�로???�????모달 */}
+            
+            <div className="flex flex-col gap-1">
+<label className="text-theme-muted">?�로???�름</label>
+              <input
+                type="text"
+                required
+"              <label className=\"text-theme-muted\">?�로???�름</label>"
+                value={newProfileName}
+                onChange={(e) => setNewProfileName(e.target.value)}
+                className="bg-theme-base border border-theme-border/10 rounded p-1.5 text-theme-text outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div className="flex gap-2 border-t border-theme-border/5 pt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProfileModal(false);
+                  setNewProfileName("");
+                }}
+                className="flex-1 bg-theme-panel hover:bg-slate-700 text-theme-text py-1.5 rounded transition"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded transition"
+              >
+?�??              </button>
+            </div>
+          </div>
+        </div>
+"                ?�??              </button>"
+
+    </div>
+  );
+}
+
+export default App;
+                }}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 rounded transition"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-1.5 rounded transition"
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { 
   Send, TerminalSquare, 
-  Bot, User, Sparkles, Play, Check, ChevronUp, ChevronDown,
+  Bot, Sparkles, Play, Check, ChevronUp, ChevronDown,
   Settings, Paperclip, X, StopCircle, RefreshCw, AlertCircle, Download, Upload, Trash2
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
@@ -858,13 +858,13 @@ export const AIChat: React.FC<AIChatProps> = ({
             }}
             placeholder="메시지를 입력하세요... (Enter: 전송, Shift+Enter: 줄바꿈)"
             className="w-full bg-theme-panel border border-theme-border/20 focus:border-theme-primary/50 rounded-lg pl-9 pr-10 py-3 text-sm text-theme-text outline-none resize-none min-h-[50px] max-h-[150px] transition-all custom-scrollbar placeholder:text-theme-muted/50 shadow-inner"
-            style={{ fontFamily: "'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace" }}
-            rows={1}
             style={{
+              fontFamily: "'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace",
               height: "auto",
               minHeight: "52px",
               fontSize: `${fontSize}px`
             }}
+            rows={1}
           />
           
           <input 

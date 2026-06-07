@@ -15,6 +15,20 @@
     --color-primary-light: 129 140 248; /* indigo-400 */
     --color-accent: 16 185 129;    /* emerald-500 */
     --color-error: 239 68 68;       /* red-500 */
+    /* Explorer / File tree */
+    --color-explorer-folder: 129 140 248;  /* indigo-400 */
+    --color-explorer-ssh: 16 185 129;      /* emerald-500 */
+    --color-explorer-select: 99 102 241;   /* indigo-500 */
+    --color-explorer-file: 156 163 175;    /* slate-400 */
+    /* Tabs */
+    --color-tab-active: 99 102 241;
+    --color-tab-text: 243 244 246;
+    /* Custom background (set by ThemeEditor) */
+    --custom-bg: ;
+    --custom-bg-image: none;
+    --custom-bg-size: cover;
+    --custom-bg-repeat: no-repeat;
+    --custom-bg-blur: 0px;
   }
 
   [data-theme="light"] {
@@ -29,6 +43,12 @@
     --color-primary-light: 99 102 241; /* indigo-500 */
     --color-accent: 13 148 136;     /* teal-600 */
     --color-error: 225 29 72;       /* rose-600 */
+    --color-explorer-folder: 79 70 229;
+    --color-explorer-ssh: 13 148 136;
+    --color-explorer-select: 79 70 229;
+    --color-explorer-file: 100 116 139;
+    --color-tab-active: 79 70 229;
+    --color-tab-text: 15 23 42;
   }
 
   [data-theme="hacker"] {
@@ -43,6 +63,12 @@
     --color-primary-light: 31 111 235; /* GitHub Dark Blue */
     --color-accent: 63 185 80;      /* GitHub Green */
     --color-error: 248 81 73;       /* soft red */
+    --color-explorer-folder: 88 166 255;
+    --color-explorer-ssh: 63 185 80;
+    --color-explorer-select: 88 166 255;
+    --color-explorer-file: 139 148 158;
+    --color-tab-active: 88 166 255;
+    --color-tab-text: 201 209 217;
   }
 
   [data-theme="oceanic"] {
@@ -57,6 +83,12 @@
     --color-primary-light: 143 188 187; /* Nord Frost teal */
     --color-accent: 163 190 140;    /* Nord aurora green */
     --color-error: 191 97 106;      /* Nord aurora red */
+    --color-explorer-folder: 136 192 208;
+    --color-explorer-ssh: 163 190 140;
+    --color-explorer-select: 136 192 208;
+    --color-explorer-file: 216 222 233;
+    --color-tab-active: 136 192 208;
+    --color-tab-text: 236 239 244;
   }
 
   [data-theme="dracula"] {
@@ -71,6 +103,12 @@
     --color-primary-light: 255 121 198; /* Dracula Pink */
     --color-accent: 80 250 123;     /* Dracula Green */
     --color-error: 255 85 85;       /* Dracula Red */
+    --color-explorer-folder: 189 147 249;
+    --color-explorer-ssh: 80 250 123;
+    --color-explorer-select: 189 147 249;
+    --color-explorer-file: 98 114 164;
+    --color-tab-active: 189 147 249;
+    --color-tab-text: 248 248 242;
   }
 
   [data-theme="monokai"] {
@@ -85,6 +123,12 @@
     --color-primary-light: 102 217 239; /* Monokai Cyan */
     --color-accent: 166 226 70;     /* Monokai Lime Green */
     --color-error: 249 38 114;      /* Monokai Pink */
+    --color-explorer-folder: 249 38 114;
+    --color-explorer-ssh: 166 226 70;
+    --color-explorer-select: 249 38 114;
+    --color-explorer-file: 117 113 94;
+    --color-tab-active: 249 38 114;
+    --color-tab-text: 248 248 242;
   }
 
   [data-theme="gruvbox"] {
@@ -99,8 +143,15 @@
     --color-primary-light: 250 189 47; /* Gruvbox Yellow */
     --color-accent: 184 187 38;    /* Gruvbox Green */
     --color-error: 251 73 52;      /* Gruvbox Red */
+    --color-explorer-folder: 254 128 25;
+    --color-explorer-ssh: 184 187 38;
+    --color-explorer-select: 254 128 25;
+    --color-explorer-file: 168 153 132;
+    --color-tab-active: 254 128 25;
+    --color-tab-text: 251 241 199;
   }
 }
+
 
 /* 전역 바디 스타일 및 스크롤바 커스텀 */
 body {
@@ -108,6 +159,23 @@ body {
   background-color: rgb(var(--color-bg-base)); 
   color: rgb(var(--color-text-main));
   overflow: hidden;
+  position: relative;
+}
+
+/* 커스텀 배경 레이어 (ThemeEditor가 제어) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--custom-bg);
+  background-image: var(--custom-bg-image);
+  background-size: var(--custom-bg-size, cover);
+  background-repeat: var(--custom-bg-repeat, no-repeat);
+  background-position: center;
+  filter: blur(var(--custom-bg-blur, 0px));
+  transition: background 0.3s, filter 0.3s;
 }
 
 /* 크롬/사파리 브라우저 스크롤바 디자인 */

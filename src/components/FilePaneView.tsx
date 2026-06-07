@@ -428,10 +428,23 @@ export const FilePaneView: React.FC<FilePaneProps> = ({
               <div
                 key={`${file.path}-${i}`}
                 className={`flex items-center gap-2 px-3 py-1 cursor-pointer transition-colors ${
-                  selectedNodes.has(`${sessionId}:${file.path}`)
-                    ? "bg-theme-primary/30"
-                    : "hover:bg-theme-panel hover:bg-white/5"
-                } ${focusedNode?.path === file.path ? "ring-1 ring-inset ring-theme-primary-light/50" : ""}`}
+                  focusedNode?.path === file.path ? "ring-1 ring-inset ring-theme-primary-light/50" : ""
+                }`}
+                style={{
+                  background: selectedNodes.has(`${sessionId}:${file.path}`)
+                    ? "rgba(var(--color-explorer-select, 99 102 241), 0.28)"
+                    : undefined,
+                }}
+                onMouseEnter={e => {
+                  if (!selectedNodes.has(`${sessionId}:${file.path}`)) {
+                    (e.currentTarget as HTMLDivElement).style.background = "rgba(var(--color-border, 255 255 255), 0.05)";
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!selectedNodes.has(`${sessionId}:${file.path}`)) {
+                    (e.currentTarget as HTMLDivElement).style.background = "";
+                  }
+                }}
                 onClick={(e) => handleItemClick(e, file)}
                 onDoubleClick={(e) => handleItemDoubleClick(e, file)}
               
@@ -450,12 +463,17 @@ export const FilePaneView: React.FC<FilePaneProps> = ({
                 {file.isDir ? (
                   <Folder
                     size={15}
-                    className={`pointer-events-none ${isLocal ? "text-theme-primary-light fill-indigo-400/20" : "text-theme-accent fill-emerald-400/20"}`}
+                    className="pointer-events-none"
+                    style={{ color: isLocal
+                      ? "rgb(var(--color-explorer-folder, 129 140 248))"
+                      : "rgb(var(--color-explorer-ssh, 16 185 129))"
+                    }}
                   />
                 ) : (
                   <File
                     size={15}
-                    className="text-theme-muted pointer-events-none"
+                    className="pointer-events-none"
+                    style={{ color: "rgb(var(--color-explorer-file, 156 163 175))" }}
                   />
                 )}
               </div>
